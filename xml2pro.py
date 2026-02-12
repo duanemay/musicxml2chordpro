@@ -64,9 +64,14 @@ class XML2Pro:
         self.process_root()
     
     def process_root(self):
-        # Get the song name
+        # Get the song name - try multiple possible locations
         title_element = self.root.find('work/work-title')
-        self.title = title_element.text
+        if title_element is None:
+            title_element = self.root.find('movement-title')
+        if title_element is None:
+            title_element = self.root.find('identification/source')
+
+        self.title = title_element.text if title_element is not None else 'Untitled'
         self.write('{{title:{title}}}\n'.format(title=self.title))
 
         # Get a list of all of the parts
@@ -115,7 +120,7 @@ class XML2Pro:
                     try:
                        chord_alter = child.find('root/root-alter').text
                        alter = alters[int(chord_alter)]
-                    except AttributeError, KeyError:
+                    except (AttributeError, KeyError):
                        alter = ''
                     quality = child.find('kind').text
                     q_code = qualities[quality]
