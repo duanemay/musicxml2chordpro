@@ -149,7 +149,7 @@ class XML2Pro:
         self.write('\n')
 
     def write(self, data):
-        self.fout.write(data.encode('utf-8'))
+        self.fout.write(data)
 
 
 if __name__ == '__main__':
