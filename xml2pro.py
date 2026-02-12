@@ -4,7 +4,7 @@
 """
 
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as eT
 
 
 # Translate MusicXML chord quality to Chordpro
@@ -53,12 +53,13 @@ alters = {
 }
 
 class XML2Pro:
-    def __init__(self, data, fout):
+    def __init__(self, data, fout, output_notes=False):
         self.data = data
         self.fout = fout
+        self.output_notes = output_notes
 
     def process_file(self):
-        self.tree = ET.parse(self.data)
+        self.tree = eT.parse(self.data)
         self.root = self.tree.getroot()
 
         self.process_root()
@@ -119,6 +120,9 @@ class XML2Pro:
         # Process all measure in this part.
         measures = part.findall('measure')  # Assume measures are sorted. We should really sort them by attribute 'number'
 
+        # Check if this part has any lyrics
+        has_lyrics = any(m.find('.//lyric') is not None for m in measures)
+
         # Go through each measure, looking for
         #   'harmony', which tells us the chord to use for the next note
         #   'note', which has a lyric syllable attached to it
@@ -146,14 +150,35 @@ class XML2Pro:
                         line_buffer.append('-')
                     line_buffer.append('[{chord}]'.format(chord=chord))
                 elif child.tag == 'note':
+                    # Check if this note is a rest
+                    is_rest = child.find('rest') is not None
+
                     lyrics = child.findall('lyric[@number="{}"]'.format(line))
-                    for l in lyrics:
-                        stype = l.find('syllabic').text
-                        syllable = l.find('text').text
-                        line_buffer.append(syllable)
-                        # If this is a single syllable word, or the end of a word, print a space
-                        if stype in ['single', 'end']:
-                            line_buffer.append(' ')
+                    if lyrics:
+                        # Has lyrics - output them
+                        for l in lyrics:
+                            stype = l.find('syllabic').text
+                            syllable = l.find('text').text
+                            line_buffer.append(syllable)
+                            # If this is a single syllable word, or the end of a word, print a space
+                            if stype in ['single', 'end']:
+                                line_buffer.append(' ')
+                    elif self.output_notes and not has_lyrics and not is_rest:
+                        # No lyrics in this part and notes enabled - output notes in ChordPro format
+                        pitch = child.find('pitch')
+                        if pitch is not None:
+                            step = pitch.find('step').text
+                            alter_elem = pitch.find('alter')
+
+                            # Get the note name in lowercase
+                            note = step.lower()
+
+                            # Add alteration if present
+                            if alter_elem is not None:
+                                alter_value = int(alter_elem.text)
+                                note += alters.get(alter_value, '')
+
+                            line_buffer.append('[{note}]'.format(note=note))
 
             # Every 4 bars, start a new line
             if measure_number % 4 == 0:
@@ -174,6 +199,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Extract chords and lyrics from MusicXML file.')
     parser.add_argument('filenames', metavar='file', nargs='+', default='-', help='a MusicXML file to process')
+    parser.add_argument('--notes', action='store_true', help='output individual notes for instrumental parts (no lyrics)')
 
     args = parser.parse_args()
 
@@ -184,6 +210,6 @@ if __name__ == '__main__':
             data = sys.stdin
         else:
             data = filename
-        x1 = XML2Pro(data, fout)
+        x1 = XML2Pro(data, fout, output_notes=args.notes)
         x1.process_file()
 

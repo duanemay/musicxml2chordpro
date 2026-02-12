@@ -2,28 +2,73 @@
 Extract chord charts from MusicXML files
 
 
-## Proposed usage
+## Usage
 
-* Create score in Musescore
+### Basic Usage
+```bash
+python3 xml2pro.py Song.xml > Song.pro
+```
 
-* Create Chordpro file
-      python xml2pro.py Song_name.xml > Song_name.pro
+### Output Individual Notes (Instrumental Music)
+For pure instrumental music without lyrics or chords, use the `--notes` flag to output individual notes in ChordPro format:
+```bash
+python3 xml2pro.py --notes MozartSonata.xml > MozartSonata.pro
+```
 
-* Transfer Chordpro file to tablet, where Songbook can 
-  read it.
-  
-* Alternatively, use Chordii to create Postscript file
-  for printing.
+Notes are output in lowercase (e.g., `[c#]`, `[d]`, `[a]`) and respects accidentals.
+
+
+## What Gets Converted
+
+The tool outputs different content depending on what's in the MusicXML file:
+
+| File Type | Default Output | With --notes |
+|-----------|----------------|--------------|
+| Song with lyrics + chords | Full lead sheet | Full lead sheet |
+| Bass/Chord chart (no lyrics) | Chords only | Chords only |
+| Pure instrumental (no lyrics, no chords) | Title & key only | Individual notes |
+
+### Examples
+
+**Song with lyrics and chords:**
+```
+{title:My Song}
+{key:C Amin}
+
+My [C]love song [G]with chords [F]and lyrics...
+```
+
+**Chord chart:**
+```
+{title:Bass Line}
+{key:D Bmin}
+
+[Am][E][Am][D][A][D][E][D][A][D]
+[Am][E][A][D][A][D][Em][D]
+```
+
+**Instrumental with notes (using --notes flag):**
+```
+{title:Piano Sonata}
+{key:A Fmin}
+
+[c#][c#][e][a][a][c#][e][a][a][a][a][d][c#][b][c#]
+[d][e][a][c#][d][e][a][c#][d][e][a][c#][d][e][a][c#]
+```
+
+
+## Suggested Workflow
+
+* Create ChordPro file
+      python3 xml2pro.py Song_name.xml > Song_name.pro
+* Transfer ChordPro file to tablet (e.g., Songbook app)
+* Alternatively, use Chordii to create PostScript for printing
       chordii Song_name.pro > Song_name.ps
       
 
+## Known Issues
 
-## Issues
-
-* **Designed for vocal music with lyrics and chords. ** Instrumental 
-  music (like piano sonatas) will produce no output since there are no 
-  lyrics nor chords to extract. The tool is specifically for creating lead sheets 
-  in ChordPro format.
+* **Designed primarily for vocal music.** Instrumental music without chord symbols will only output title and key unless `--notes` flag is used.
 
 * Does not know where to break a line. Sometimes, a line break
   every 4 bars is OK, sometimes it would be better every 2 bars.
