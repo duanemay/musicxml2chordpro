@@ -96,6 +96,19 @@ class XML2Pro:
         # End of the header info, about to start with the chords and music.
         self.write('\n')
         
+        # Check if file has lyrics and chords
+        measures = part.findall('measure')
+        has_lyrics = any(m.find('.//lyric') is not None for m in measures)
+        has_chords = any(m.find('.//harmony') is not None for m in measures)
+
+        if not has_lyrics and not has_chords:
+            import sys
+            print("Warning: No lyrics or chords found in this file.", file=sys.stderr)
+            print("This appears to be instrumental music without chord symbols.", file=sys.stderr)
+        elif not has_lyrics and has_chords:
+            import sys
+            print("Note: No lyrics found, but chord symbols present. Outputting chords only.", file=sys.stderr)
+
         # Process each line of lyrics.
         # Need to work out how many lines there are...
         self.process_line(part, '1')

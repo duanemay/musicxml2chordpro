@@ -6,9 +6,6 @@ Extract chord charts from MusicXML files
 
 * Create score in Musescore
 
-* Export to MusicXML file
-      musescore -o Song_name.xml Song_Name.mscz
-
 * Create Chordpro file
       python xml2pro.py Song_name.xml > Song_name.pro
 
@@ -22,6 +19,11 @@ Extract chord charts from MusicXML files
 
 
 ## Issues
+
+* **Designed for vocal music with lyrics and chords. ** Instrumental 
+  music (like piano sonatas) will produce no output since there are no 
+  lyrics nor chords to extract. The tool is specifically for creating lead sheets 
+  in ChordPro format.
 
 * Does not know where to break a line. Sometimes, a line break
   every 4 bars is OK, sometimes it would be better every 2 bars.
