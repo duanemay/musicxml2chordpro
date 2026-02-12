@@ -106,12 +106,13 @@ class XML2Pro:
         # Process all measure in this part.
         measures = part.findall('measure')  # Assume measures are sorted. We should really sort them by attribute 'number'
 
-
         # Go through each measure, looking for
         #   'harmony', which tells us the chord to use for the next note
         #   'note', which has a lyric syllable attached to it
 
         stype = ''  # Type of syllable: single, start, middle or end.
+        line_buffer = []  # Buffer to collect content for current line
+
         for m in measures:
             measure_number = int(m.get('number'))
             for child in m:
@@ -129,22 +130,27 @@ class XML2Pro:
                     # If we have to print a chord in the middle of a word,
                     # insert a dash/hyphen before the chord
                     if stype in ['begin', 'middle']:
-                        self.write('-')
-                    self.write('[{chord}]'.format(chord=chord))
+                        line_buffer.append('-')
+                    line_buffer.append('[{chord}]'.format(chord=chord))
                 elif child.tag == 'note':
                     lyrics = child.findall('lyric[@number="{}"]'.format(line))
                     for l in lyrics:
                         stype = l.find('syllabic').text
                         syllable = l.find('text').text
-                        self.write(syllable)
+                        line_buffer.append(syllable)
                         # If this is a single syllable word, or the end of a word, print a space
                         if stype in ['single', 'end']:
-                            self.write(' ')
-
+                            line_buffer.append(' ')
 
             # Every 4 bars, start a new line
             if measure_number % 4 == 0:
-               self.write('\n')
+               # Write the line content, removing trailing spaces
+               self.write(''.join(line_buffer).rstrip() + '\n')
+               line_buffer = []
+
+        # Write any remaining content
+        if line_buffer:
+            self.write(''.join(line_buffer).rstrip())
         self.write('\n')
 
     def write(self, data):
