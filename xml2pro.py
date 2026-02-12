@@ -141,7 +141,6 @@ class XML2Pro:
                         if stype in ['single', 'end']:
                             self.write(' ')
 
-            self.write('[|]')
 
             # Every 4 bars, start a new line
             if measure_number % 4 == 0:
