@@ -32,6 +32,12 @@ class TestXML2Pro(unittest.TestCase):
         model_filename = 'test/MozartPianoSonataNotes.pro'
         self.file_testers(input_filename, model_filename, output_notes=True)
 
+    def test_chant(self):
+        """Test conversion of 'Chant' against model file"""
+        input_filename = 'test/Chant.xml'
+        model_filename = 'test/Chant.pro'
+        self.file_testers(input_filename, model_filename, output_notes=True)
+
     def file_testers(self, input_filename, model_filename, output_notes=False):
         fout = StringIO()
         x1 = xml2pro.XML2Pro(input_filename, fout, output_notes=output_notes)

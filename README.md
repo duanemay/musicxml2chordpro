@@ -87,3 +87,15 @@ My [C]love song [G]with chords [F]and lyrics...
   codas, and other form markings.
 
 
+## Test File Attribution
+
+### from the original musicxml2chordpro project
+https://github.com/ironss/musicxml2chordpro
+
+- [An Affair to Remember.xml](test/An%20Affair%20to%20Remember.xml)
+
+### Examples from musicxml.com
+https://www.musicxml.com/music-in-musicxml/example-set/
+
+- [Chant.xml](test/Chant.xml)
+- [MozartPianoSonata.xml](test/MozartPianoSonata.xml)

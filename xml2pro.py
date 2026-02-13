@@ -157,12 +157,17 @@ class XML2Pro:
                     if lyrics:
                         # Has lyrics - output them
                         for l in lyrics:
-                            stype = l.find('syllabic').text
-                            syllable = l.find('text').text
-                            line_buffer.append(syllable)
-                            # If this is a single syllable word, or the end of a word, print a space
-                            if stype in ['single', 'end']:
-                                line_buffer.append(' ')
+                            syllabic_elem = l.find('syllabic')
+                            text_elem = l.find('text')
+
+                            # Some lyrics only have <extend> elements without syllabic/text (for melismas)
+                            if text_elem is not None:
+                                stype = syllabic_elem.text if syllabic_elem is not None else 'single'
+                                syllable = text_elem.text
+                                line_buffer.append(syllable)
+                                # If this is a single syllable word, or the end of a word, print a space
+                                if stype in ['single', 'end']:
+                                    line_buffer.append(' ')
                     elif self.output_notes and not has_lyrics and not is_rest:
                         # No lyrics in this part and notes enabled - output notes in ChordPro format
                         pitch = child.find('pitch')
